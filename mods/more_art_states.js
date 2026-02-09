@@ -25,7 +25,8 @@ elements.powder_art = {
 	reactions: {
     	"radiation": { func:function(pixel, pixel2) {
 			pixel.element = "radiated_art"
-			pixel2.element = "gas_art"
+            pixel2.element = "gas_art"
+            pixel2.color = pixel.color
 		}}
 	},
 }
