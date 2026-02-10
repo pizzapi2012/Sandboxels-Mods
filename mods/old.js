@@ -78,9 +78,12 @@ a:hover { text-decoration: underline; }
 	/* margin-top: 15px; */
 	max-width: 100vw;
 }
-.gameDiv-wide {
-	margin-top: 0!important;
-	border: none!important;
+#gameDiv.gameDiv-wide {
+  border: none !important;
+  margin-top: 55px;
+}
+.standalone #gameDiv.gameDiv-wide {
+  margin-top: 0!important
 }
 #game {
 	image-rendering: pixelated;
