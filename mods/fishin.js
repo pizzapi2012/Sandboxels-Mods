@@ -1,50 +1,51 @@
+KB = false;
 document.onkeydown = function(ki)/*keyboard_input*/ {
     //a
-    if (ki.keyCode == 65) {
+    if (ki.code == "KeyA") {
         KA = true;
         //vX ++;
     }
     //d
-    if (ki.keyCode == 68) {
+    if (ki.code == "KeyD") {
         KD = true;
         //vX ++;
     }
     //w
-    if (ki.keyCode == 81) {
+    if (ki.code == "KeyW") {
         KQ = true;
         //vY ++;
     }
     //s
-    if (ki.keyCode == 83) {
+    if (ki.code == "KeyS") {
         KS = true;
         //vY ++;
     }
-    if (ki.keyCode == 66) {
+    if (ki.code  == "KeyB") {
         KB = true;
     }
 }
 document.onkeyup = function(i2)/*keyboard_input*/ {
     //a
-    if (i2.keyCode == 65) {
+    if (i2.code == "KeyA") {
         KA = false;
         //vX --;
     }
     //d
-    if (i2.keyCode == 68) {
+    if (i2.code == "KeyD") {
         KD = false;
        //vX --;
     }
     //w
-    if (i2.keyCode == 81) {
+    if (i2.code == "KeyW") {
         KQ = false;
         //vY = 0;
     }
     //s
-    if (i2.keyCode == 83) {
+    if (i2.code == "KeyS") {
         KS = false;
         //vY = 0;
     }
-    if (i2.keyCode == 66) {
+    if (i2.code == "KeyB") {
         KB = false;
 
     }
@@ -86,7 +87,7 @@ elements.fishing_rod = {
         reelIn = true
     }
     if (KB === true) {
-        alert(`You have $${money}.`)
+        drawText(`You have $${money}.`)
         KB = false
     }
     },
