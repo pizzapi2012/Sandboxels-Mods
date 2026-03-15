@@ -25,6 +25,7 @@
         elem.type = "number";
         elem.value = value.toString();
         elem.step = this.step.toString();
+        elem.classList.add("settingsInput");
         elem.onchange = (ev) => {
           const parsed = Number.parseFloat(ev.target.value);
           if (!Number.isNaN(parsed)) {
@@ -186,10 +187,9 @@
     cpan_speed;
     upan_speed;
     pan_keys;
-    show_floater;
     show_pos;
-    enable_scroll_zoom;
-    scroll_zoom_multiplier;
+    show_floater;
+    floater_scale;
     pan_zeroing_en;
     zoom_zeroing_en;
     constructor(on_edit) {
@@ -244,6 +244,15 @@
         "Whether to show the floater or not",
         validator
       );
+      this.floater_scale = new Setting(
+        "Floater scale",
+        "floater_scale",
+        settingType.NUMBER,
+        false,
+        1,
+        "The floater scale",
+        validator
+      );
       this.show_pos = new Setting(
         "Show position overlay",
         "show_pos_ovl",
@@ -263,24 +272,6 @@
         ],
         false,
         "wasd"
-      );
-      this.enable_scroll_zoom = new Setting(
-        "Use shift+scroll for zoom",
-        "enable_scroll_zoom",
-        settingType.BOOLEAN,
-        false,
-        true,
-        "Whether to use shift+scroll for zooming or not",
-        validator
-      );
-      this.scroll_zoom_multiplier = new Setting(
-        "Scroll zoom multiplier",
-        "scroll_zoom_mul",
-        settingType.NUMBER,
-        false,
-        1,
-        "Multiplier for scroll zoom speed",
-        validator
       );
       this.pan_zeroing_en = new Setting(
         "Enable pan zeroing",
@@ -311,7 +302,25 @@
         }
       );
       this.unl_zoom = new SettingGroup({
-        speed: new Setting(
+        mouse_speed: new Setting(
+          "Scroll zoom speed",
+          "scroll_zoom_speed",
+          settingType.NUMBER,
+          false,
+          1,
+          "Speed for zooming with the scroll wheel",
+          validator
+        ),
+        invert_scroll: new Setting(
+          "Invert scroll",
+          "invert_scroll",
+          settingType.BOOLEAN,
+          false,
+          false,
+          "Whether to invert scroll or not",
+          validator
+        ),
+        kbd_speed: new Setting(
           "Zoom speed",
           "unl_zoom_speed",
           settingType.NUMBER,
@@ -349,19 +358,15 @@
       settings_tab.registerSettings(
         void 0,
         this.canvas_bkg,
+        this.show_pos,
         this.show_floater,
-        this.show_pos
+        this.floater_scale
       );
       settings_tab.registerSettings(
         "Keybinds (requires reset)",
         this.pan_keys,
         this.pan_zeroing_en,
         this.zoom_zeroing_en
-      );
-      settings_tab.registerSettings(
-        "Mouse",
-        this.enable_scroll_zoom,
-        this.scroll_zoom_multiplier
       );
       settings_tab.registerSettings(
         "Zoom",
@@ -395,28 +400,15 @@
           evt = evt.touches[0];
           isMobile = true;
         }
-        const rect = canvas2.getBoundingClientRect();
         const clx = evt.clientX;
         const cly = evt.clientY;
-        let x = (clx - rect.left) / this.scale();
-        let y = (cly - rect.top) / this.scale();
-        x = Math.floor(x / canvas2.clientWidth * (width + 1));
-        y = Math.floor(y / canvas2.clientHeight * (height + 1));
-        return { x, y };
+        return this.mouse_to_world(clx, cly);
       };
-      window.wheelHandle = (e) => {
+      const wheel_handler = (e) => {
         e.preventDefault();
         if (e.shiftKey) {
-          const mul = this.settings.scroll_zoom_multiplier.value;
-          let new_level;
-          if (this.settings.zoom.value == 0) {
-            const zoom_level_count = this.settings.zoom.settings[0].value.length;
-            new_level = this.zoom_level + Math.round(e.deltaY * mul / 5);
-            new_level = Math.min(new_level, zoom_level_count - 1);
-            new_level = Math.max(new_level, 0);
-          } else {
-            new_level = this.zoom_level + e.deltaY * mul / 1e3;
-          }
+          const speed = this.settings.unl_zoom.settings.mouse_speed.value * (this.settings.unl_zoom.settings.invert_scroll.value ? -1 : 1);
+          const new_level = this.zoom_level + e.deltaY * speed / 1e3;
           const max = this.settings.unl_zoom.settings.max.value;
           const min = this.settings.unl_zoom.settings.min.value;
           if (new_level > max) {
@@ -429,33 +421,25 @@
           this.update();
           return;
         }
-        if ((/* @__PURE__ */ new Date()).getTime() - lastScroll < 25) {
-          return;
-        }
-        lastScroll = (/* @__PURE__ */ new Date()).getTime();
-        var deltaY = e.deltaY;
-        if (window.settings.invertscroll) {
-          if (deltaY > 0) {
-            deltaY = 1;
-          } else {
-            deltaY = -1;
-          }
-        } else {
-          if (deltaY < 0) {
-            deltaY = 1;
-          } else {
-            deltaY = -1;
-          }
-        }
-        mouseSize += Math.round(deltaY);
-        checkMouseSize(Math.sign(deltaY));
       };
-      this.patcher.canvas_div.addEventListener("wheel", wheelHandle);
+      if (this.settings.zoom.value === 1) {
+        window.wheelHandle = wheel_handler;
+        this.patcher.canvas_div.addEventListener("wheel", wheel_handler);
+      }
       runAfterReset(() => {
         this.zoom_level = 1;
         this.zoom_panning = [0, 0];
         this.update();
       });
+    }
+    mouse_to_world(x, y) {
+      const rect = canvas.getBoundingClientRect();
+      const x_scaled = (x - rect.left) / this.scale();
+      const y_scaled = (y - rect.top) / this.scale();
+      return {
+        x: Math.floor(x_scaled / canvas.clientWidth * (width + 1)),
+        y: Math.floor(y_scaled / canvas.clientHeight * (height + 1))
+      };
     }
     handle_zoom(direction) {
       if (this.settings.zoom.value == 0) {
@@ -475,7 +459,7 @@
         }
       } else {
         const settings = this.settings.zoom.settings[1].settings;
-        const speed = settings.speed.value;
+        const speed = settings.kbd_speed.value;
         const min = settings.min.value;
         const max = settings.max.value;
         switch (direction) {
@@ -583,46 +567,19 @@
   };
 
   // assets/numlist.css
-  var numlist_default = "#settingsMenu .zm_nml_btn_container button { font-size: 2em; padding: 0px; margin: 0px;}\r\n#settingsMenu .zm_nml_icontainer { align-self: center }\r\n#settingsMenu .zm_nml_setting { display: grid; grid-template-columns: 7em 1fr;}\r\n\r\n#settingsMenu .zm_nml_setting span {\r\n    input { width: 2em; margin-right: 4px; margin-bottom: 4px;}\r\n    \r\n    input:focus {\r\n        outline: none;\r\n        box-shadow: none;\r\n        border-color: white;\r\n    }\r\n}";
+  var numlist_default = "#settingsMenu .zm_nml_btn_container button { font-size: 2em; padding: 0px; margin: 0px;}\r\n#settingsMenu .zm_nml_icontainer { align-self: center; flex-wrap: wrap; }\r\n#settingsMenu .zm_nml_setting { display: grid; grid-template-columns: 7em 1fr;}\r\n\r\n#settingsMenu .zm_nml_setting span {\r\n    input { width: 2.5em; margin-right: 4px; margin-bottom: 4px;}\r\n    \r\n    input:focus {\r\n        outline: none;\r\n        box-shadow: none;\r\n        border-color: white;\r\n    }\r\n}";
 
   // assets/main.css
-  var main_default = '#zm_data_div { margin-bottom: 10px }\r\n#canvasDiv   { overflow: hidden; background-color: var(--opac-85) }\r\n\r\n@media(pointer=coarse){\r\n    #zm_floater_container#zm_floater_container { \r\n        width: 40%;\r\n        height: auto;\r\n    }\r\n    #zm_floater_container:has(#zm_collapse[data-collapsed="true"]){\r\n        width: calc(40% / 3);\r\n    }\r\n}\r\n\r\n@media(pointer:coarse) and (orientation:landscape){\r\n    #zm_floater_container#zm_floater_container {\r\n        width: auto;\r\n        top: 5px;\r\n    }\r\n    #zm_floater_container:has(#zm_collapse[data-collapsed="true"]){\r\n        width: calc(40% / 3);\r\n    }\r\n}\r\n\r\n#colorSelector { z-index: 1; right: 5px }\r\n#zm_floater_container {\r\n    position: absolute;\r\n    display: grid;\r\n\r\n    right: 5px;\r\n    bottom: 5px;\r\n    height: 100px;\r\n    aspect-ratio: 1;\r\n\r\n    max-width: 200px;\r\n    max-height: 200px;\r\n\r\n    border: 2px solid white;\r\n    background-color: black;\r\n    font-size: 120%;\r\n\r\n    button { text-align: center; border: 0px solid white }\r\n\r\n    button:where([data-pos="tl"]) { border-width: 0px 2px 2px 0px };\r\n    button:where([data-pos="tr"]) { border-width: 2px 2px 0px 0px };\r\n    button:where([data-pos="bl"]) { border-width: 0px 0px 2px 2px };\r\n    button:where([data-pos="br"]) { border-width: 2px 0px 0px 2px };\r\n}\r\n#zm_floater_container:has(#zm_collapse[data-collapsed="true"]) {\r\n    height: 50px;\r\n    \r\n    button:not(#zm_collapse) { display: none; }\r\n}\r\n#canvasDiv:has(#colorSelector[style *= "block"]) #zm_floater_container {\r\n    bottom: 50px;\r\n}\r\n\r\n.zm_corner { border: 2px solid white; }\r\n\r\n#zm_collapse {\r\n    grid-row: 3;\r\n    grid-column: 3;\r\n}\r\n#zm_collapse[data-collapsed="true"] {\r\n    grid-row: 1;\r\n    grid-column: 1;\r\n    border-width: 0px;\r\n}';
+  var main_default = '#zm_data_div { margin-bottom: 10px }\r\n#canvasDiv   { overflow: hidden; background-color: var(--opac-85) }\r\n\r\n@media(pointer=coarse){\r\n    #zm_floater_container#zm_floater_container { \r\n        width: calc(40% * var(--zm-floater-scale));\r\n        height: auto;\r\n    }\r\n    #zm_floater_container:has(#zm_collapse[data-collapsed="true"]){\r\n        width: calc(40% / 3 * var(--zm-floater-scale));\r\n    }\r\n}\r\n\r\n@media(pointer:coarse) and (orientation:landscape){\r\n    #zm_floater_container#zm_floater_container {\r\n        width: auto;\r\n        top: 5px;\r\n    }\r\n    #zm_floater_container:has(#zm_collapse[data-collapsed="true"]){\r\n        width: calc(40% / 3 * var(--zm-floater-scale));\r\n    }\r\n}\r\n\r\n@media not (pointer: coarse){\r\n    #zm_floater_container:has(#zm_collapse[data-collapsed="true"]) {\r\n        width: calc(33px * var(--zm-floater-scale));\r\n    }\r\n}\r\n\r\n#zm_floater_container:has(#zm_collapse[data-collapsed="true"]) {\r\n    width: calc(33px * var(--zm-floater-scale));\r\n\r\n    button:not(#zm_collapse) { display: none; }\r\n}\r\n\r\n#colorSelector { z-index: 1; right: 5px }\r\n#zm_floater_container {\r\n    position: absolute;\r\n    display: grid;\r\n\r\n    right: 5px;\r\n    bottom: 5px;\r\n\r\n    width: calc(100px * var(--zm-floater-scale));\r\n    max-width:  calc(200px * var(--zm-floater-scale));\r\n    max-height: calc(200px * var(--zm-floater-scale));\r\n    aspect-ratio: 1;\r\n\r\n    border: 2px solid white;\r\n    background-color: black;\r\n    font-size: calc(120% * var(--zm-floater-scale));\r\n\r\n    button { text-align: center; border: 0px solid white }\r\n\r\n    button:where([data-pos="tl"]) { border-width: 0px 2px 2px 0px };\r\n    button:where([data-pos="tr"]) { border-width: 2px 2px 0px 0px };\r\n    button:where([data-pos="bl"]) { border-width: 0px 0px 2px 2px };\r\n    button:where([data-pos="br"]) { border-width: 2px 0px 0px 2px };\r\n}\r\n\r\n#canvasDiv:has(#colorSelector[style *= "block"]) #zm_floater_container {\r\n    bottom: 50px;\r\n}\r\n\r\n.zm_corner { border: 2px solid white; }\r\n\r\n#zm_collapse {\r\n    grid-row: 3;\r\n    grid-column: 3;\r\n}\r\n\r\n#zm_collapse[data-collapsed="true"] {\r\n    grid-row: 1;\r\n    grid-column: 1;\r\n    aspect-ratio: 1;\r\n    border-width: 0px;\r\n}';
 
   // assets/multisetting.css
-  var multisetting_default = '.zm_ms_row {\r\n    display: grid;\r\n    grid-template-columns: 2.2em 1fr;    \r\n}\r\n\r\n.zm_ms_row[data-current="false"] {\r\n    .zm_ms_selbtn { color: transparent }\r\n}\r\n\r\n.zm_ms_selbtn.zm_ms_selbtn:not(#_) {\r\n    height: 100%;\r\n    width: calc(100% - 10px);\r\n\r\n    margin-right: 2px;\r\n    padding: 0px;\r\n\r\n    border: 2px solid var(--theme);\r\n    font-size: 1.5em;\r\n}';
+  var multisetting_default = '.zm_ms_row {\r\n    display: grid;\r\n    grid-template-columns: 2.2em 1fr;    \r\n}\r\n\r\n.zm_ms_row[data-current="false"] {\r\n    .zm_ms_selbtn { color: transparent }\r\n}\r\n\r\n.zm_ms_selbtn.zm_ms_selbtn:not(#_) {\r\n    align-items: center;\r\n    justify-content: center;\r\n    height: 100%;\r\n    width: calc(100% - 10px);\r\n\r\n    margin-right: 2px;\r\n    padding: 0px;\r\n\r\n    border: 2px solid var(--theme);\r\n    font-size: 1.5em\r\n}';
 
   // assets/ctrl_info.html
   var ctrl_info_default = "<tr>\r\n    <td>Zoom in/out</td>\r\n    <td>\r\n        <kbd>9</kbd>/\r\n        <kbd>0</kbd>\r\n    </td>\r\n</tr>\r\n<tr>\r\n    <td>Pan</td>\r\n    <td>\r\n        <kbd>W</kbd>\r\n        <kbd>A</kbd>\r\n        <kbd>S</kbd>\r\n        <kbd>D</kbd>\r\n    </td>\r\n</tr>\r\n<tr>\r\n    <td>Pan (fast)</td>\r\n    <td>\r\n        <kbd>Shift</kbd> + \r\n        <kbd>W</kbd>\r\n        <kbd>A</kbd>\r\n        <kbd>S</kbd>\r\n        <kbd>D</kbd>\r\n    </td>\r\n</tr>";
 
   // assets/floater.html
   var floater_default = '<div id="zm_floater_container">\r\n    <button id="zm_floater_u" style="grid-area: 1 / 2;">&uarr;</button>\r\n    <button id="zm_floater_d" style="grid-area: 3 / 2;">&darr;</button>\r\n    <button id="zm_floater_l" style="grid-area: 2 / 1;">&larr;</button>\r\n    <button id="zm_floater_r" style="grid-area: 2 / 3;">&rarr;</button>\r\n    \r\n    <button id="zm_floater_zi" data-pos="tl" style="grid-area: 1 / 1;">+</button>\r\n    <button id="zm_floater_zo" data-pos="bl" style="grid-area: 1 / 3;">-</button>\r\n\r\n    <button id="zm_collapse" data-pos="br">#</button>\r\n    <button id="zm_panmode_sel" data-pos="tr" style="grid-area: 3 / 1;">C</button>\r\n</div>';
-
-  // assets/nlist_spinner.png
-  var nlist_spinner_default = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAYCAYAAADH2bwQAAAAcklEQVQokcWSXQrAIAyDv8oOoPe/49wJzB7coIg/jA2WPhQ1TdOiATsThNmjJ8QV4XjdokIkRHqiEAF2NAgoSw8GlCuD3K3zYEzgFdSQBbA15LaYQN1i9lU+3y16CgDqjSl/MKBoMIk5DyNk46sf9SfhBITwI86iGhy9AAAAAElFTkSuQmCC";
-
-  // assets/spinner.css.ts
-  var CSS = `
-#betterSettings\\/div\\/zoom\\.js input::-webkit-inner-spin-button,
-#betterSettings\\/div\\/zoom\\.js input::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 0.75em;
-    background: #000 url(${nlist_spinner_default}) no-repeat center center;
-    background-size: 100%;
-    border-left: 2px solid var(--theme);
-    image-rendering: pixelated;
-    opacity: 0.8;
-}
-#betterSettings\\/div\\/zoom\\.js input::-webkit-inner-spin-button:hover,
-#betterSettings\\/div\\/zoom\\.js input::-webkit-outer-spin-button:active {
-    border-left: 2px solid white;
-    opacity: 1;
-}
-`;
-  var spinner_css_default = CSS;
 
   // src/patcher.ts
   var Patcher = class {
@@ -638,7 +595,7 @@
       document.head.appendChild(style_div);
       dependOn("betterSettings.js", () => {
         const style_div2 = document.createElement("style");
-        style_div2.innerHTML = numlist_default + multisetting_default + spinner_css_default;
+        style_div2.innerHTML = numlist_default + multisetting_default;
         document.head.appendChild(style_div2);
       });
       this.canvas_div = document.getElementById("canvasDiv");
@@ -672,24 +629,36 @@
         for (const elem of document.querySelectorAll("#betterSettings\\/div\\/zoom\\.js span.setting-span input")) {
           elem.addEventListener(elem.classList.contains("toggleInput") ? "click" : "change", cb);
         }
+        document.querySelectorAll(`#betterSettings\\/div\\/zoom\\.js input[id^=betterSettings]`).forEach((x) => x.classList.add("settingsInput"));
       });
     }
     update_from_settings() {
       this.floater_div.style.display = this.settings.show_floater.value ? "grid" : "none";
       this.zoom_data_div.style.display = this.settings.show_pos.value ? "block" : "none";
       this.canvas_div.style.backgroundColor = this.settings.canvas_bkg.value ?? "#252525";
+      document.documentElement.style.setProperty(
+        "--zm-floater-scale",
+        this.settings.floater_scale.value.toString()
+      );
     }
   };
 
+  // src/worldedit_interop.ts
+  function patch_worldedit(handler) {
+    mousePosToWorldPos = ({ x, y }) => handler.mouse_to_world(x, y);
+  }
+
   // src/main.ts
   dependOn("betterSettings.js", () => {
-    let on_change = { cb: () => {
+    const on_change = { cb: () => {
     } };
     const settings_manager = new CustomSettingsManager(on_change);
     runAfterLoad(() => {
       const patcher = new Patcher(settings_manager);
       const handler = new Handler(settings_manager, patcher);
+      dependOn("worldEdit.js", () => patch_worldedit(handler));
       on_change.cb = () => patcher.update_from_settings();
     });
   }, true);
 })();
+//! Bandaid fix to keep the UI normal looking
