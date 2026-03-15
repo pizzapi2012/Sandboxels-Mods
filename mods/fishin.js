@@ -87,7 +87,7 @@ elements.fishing_rod = {
         reelIn = true
     }
     if (KB === true) {
-        drawText(`You have $${money}.`)
+        promptText(`You have $${money}.`)
         KB = false
     }
     },
@@ -162,27 +162,27 @@ elements.hook = {
                 if (pixel.fishCaught) {
                     if (pixel.fishCaught === "fish") {
                         money += 1
-                        alert(`Wow! You caught a ${pixel.fishCaught}!`)
+                        promptText(`Wow! You caught a ${pixel.fishCaught}!`)
                     }
                     else if (pixel.fishCaught === "salmon") {
                         money += 1
-                        alert(`Wow! You caught a ${pixel.fishCaught}!`)
+                        promptText(`Wow! You caught a ${pixel.fishCaught}!`)
                     }
                     else if (pixel.fishCaught === "rainbow_trout") {
                         money += 2
-                        alert(`Wow! You caught a ${pixel.fishCaught}!`)
+                        promptText(`Wow! You caught a ${pixel.fishCaught}!`)
                     }
                     else if (pixel.fishCaught === "bluefin_tuna") {
                         money += 2
-                        alert(`Wow! You caught a ${pixel.fishCaught}!`)
+                        promptText(`Wow! You caught a ${pixel.fishCaught}!`)
                     }
                     else if (pixel.fishCaught === "albacore") {
                         money += 3
-                        alert(`Wow! You caught a ${pixel.fishCaught}!`)
+                        promptText(`Wow! You caught a ${pixel.fishCaught}!`)
                     }
                     else if (pixel.fishCaught === "crab") {
                         money += 3
-                        alert(`Wow! You caught a ${pixel.fishCaught}!`)
+                        promptText(`Wow! You caught a ${pixel.fishCaught}!`)
                     }
                 }
             }
@@ -195,27 +195,27 @@ elements.hook = {
                 if (pixel.fishCaught) {
                     if (pixel.fishCaught === "fish") {
                         money += 1
-                        alert(`Wow! You caught a ${pixel.fishCaught}!`)
+                        promptText(`Wow! You caught a ${pixel.fishCaught}!`)
                     }
                     else if (pixel.fishCaught === "salmon") {
                         money += 1
-                        alert(`Wow! You caught a ${pixel.fishCaught}!`)
+                        promptText(`Wow! You caught a ${pixel.fishCaught}!`)
                     }
                     else if (pixel.fishCaught === "rainbow_trout") {
                         money += 2
-                        alert(`Wow! You caught a ${pixel.fishCaught}!`)
+                        promptText(`Wow! You caught a ${pixel.fishCaught}!`)
                     }
                     else if (pixel.fishCaught === "bluefin_tuna") {
                         money += 2
-                        alert(`Wow! You caught a ${pixel.fishCaught}!`)
+                        promptText(`Wow! You caught a ${pixel.fishCaught}!`)
                     }
                     else if (pixel.fishCaught === "albacore") {
                         money += 3
-                        alert(`Wow! You caught a ${pixel.fishCaught}!`)
+                        promptText(`Wow! You caught a ${pixel.fishCaught}!`)
                     }
                     else if (pixel.fishCaught === "crab") {
                         money += 3
-                        alert(`Wow! You caught a ${pixel.fishCaught}!`)
+                        promptText(`Wow! You caught a ${pixel.fishCaught}!`)
                     }
                 }
             }
@@ -228,27 +228,27 @@ elements.hook = {
                 if (pixel.fishCaught) {
                     if (pixel.fishCaught === "fish") {
                         money += 1
-                        alert(`Wow! You caught a ${pixel.fishCaught}!`)
+                        promptText(`Wow! You caught a ${pixel.fishCaught}!`)
                     }
                     else if (pixel.fishCaught === "salmon") {
                         money += 1
-                        alert(`Wow! You caught a ${pixel.fishCaught}!`)
+                        promptText(`Wow! You caught a ${pixel.fishCaught}!`)
                     }
                     else if (pixel.fishCaught === "rainbow_trout") {
                         money += 2
-                        alert(`Wow! You caught a ${pixel.fishCaught}!`)
+                        promptText(`Wow! You caught a ${pixel.fishCaught}!`)
                     }
                     else if (pixel.fishCaught === "bluefin_tuna") {
                         money += 2
-                        alert(`Wow! You caught a ${pixel.fishCaught}!`)
+                        promptText(`Wow! You caught a ${pixel.fishCaught}!`)
                     }
                     else if (pixel.fishCaught === "albacore") {
                         money += 3
-                        alert(`Wow! You caught a ${pixel.fishCaught}!`)
+                        promptText(`Wow! You caught a ${pixel.fishCaught}!`)
                     }
                     else if (pixel.fishCaught === "crab") {
                         money += 3
-                        alert(`Wow! You caught a ${pixel.fishCaught}!`)
+                        promptText(`Wow! You caught a ${pixel.fishCaught}!`)
                     }
                 }
             }
