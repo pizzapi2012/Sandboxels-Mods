@@ -1,5 +1,5 @@
 // Bismuth is the best element
-alert("testing version 3");
+const testingversion = 3;
 async function _nousersthingsprompt(message, defaultValue = "") { // thanks to ggod for updated prompt function
     return new Promise(resolve => {
         promptInput(message, (result) => {
