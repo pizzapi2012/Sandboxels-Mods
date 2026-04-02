@@ -642,6 +642,7 @@ elements.compacter = {
 // only adding this bc my freind told me so 
 // new and improved version which is not 100% copied from nouser but only about 5-10%
 
+/*
 filterTypeVar = 0;
 elements.filter = {
     
@@ -769,6 +770,7 @@ elements.filter = {
     movable: false,
     canContain: true,
 }
+*/
 
 filterTypeVar2 = 0;
 elements.Destructive_Filter = {
