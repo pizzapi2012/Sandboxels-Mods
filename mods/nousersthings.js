@@ -3582,8 +3582,8 @@ if (!eLists.UNMOVABLE){eLists.UNMOVABLE = [];}
 eLists.UNMOVABLE.push("false_vacuum", "anchor")
 runAfterLoad(() => {
     const newList = []
-    for (_element in eLists.UNMOVABLE){
-        newList[elements[eLists.UNMOVABLE].id] = true
+    for (let _element in eLists.UNMOVABLE){
+        newList[elements[eLists.UNMOVABLE[_element]].id] = true
     }
     eLists.UNMOVABLE = newList
 })
