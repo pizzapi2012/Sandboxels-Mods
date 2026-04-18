@@ -1,4 +1,5 @@
 behaviors.GEL = function(pixel) {
+    doDefaults(pixel)
     pixel.sticky = true
     let sticking = false
 
@@ -8,21 +9,6 @@ behaviors.GEL = function(pixel) {
 
         if ( !stickPixel.sticky & elements[stickPixel.element].state != "gas" ) {
             sticking = true
-            if (Math.random() < 0.2) {
-                if (Math.random() > 0.5) {
-                    if (!isEmpty(pixel.x+1, pixel.y-1) & getPixel(pixel.x+1, pixel.y-1) != null ) {
-                        if (!getPixel(pixel.x+1, pixel.y-1).sticky) {
-                            tryMove(pixel, pixel.x+1, pixel.y)
-                        }
-                    }
-                } else {
-                    if (!isEmpty(pixel.x-1, pixel.y-1) & getPixel(pixel.x-1, pixel.y-1) != null ) {
-                        if (!getPixel(pixel.x-1, pixel.y-1).sticky) {
-                            tryMove(pixel, pixel.x-1, pixel.y)
-                        }
-                    }
-                }
-            }
             return
         }
     }
@@ -37,8 +23,8 @@ behaviors.GEL = function(pixel) {
             tryMove(pixel, pixel.x-1, pixel.y+1)
             return
         } else if (behindPixel != null & stickPixel.sticky) {
-            if (!getPixel(pixel.x-2, pixel.y).sticky & elements[behindPixel.element].state != "gas") {
-                sticking = true
+            if (!behindPixel.sticky & elements[behindPixel.element].state != "gas") {
+                //sticking = true
                 tryMove(pixel, pixel.x-1, pixel.y+1)
             }
         }
@@ -54,7 +40,7 @@ behaviors.GEL = function(pixel) {
             return
         } else if ( behindPixel != null & stickPixel.sticky ) {
             if (!behindPixel.sticky & elements[behindPixel.element].state != "gas" ) {
-                sticking = true
+                //sticking = true
                 tryMove(pixel, pixel.x+1, pixel.y+1)
             }
         }
@@ -75,7 +61,7 @@ behaviors.GEL = function(pixel) {
     }
 
     // normal fall
-    if (!tryMove(pixel, pixel.x, pixel.y+1) & Math.random() > 0.2 & !sticking ) {
+    if (!tryMove(pixel, pixel.x, pixel.y+1) & Math.random() > 0.2 ) {
         if (!tryMove(pixel, pixel.x+1, pixel.y+1)) {
             tryMove(pixel, pixel.x-1, pixel.y+1)
         }
@@ -105,7 +91,7 @@ elements.gel = {
     tempLow: -100,
     stateLow: "gel_ice",
     density: 1450,
-    stain: 1,
+    stain: 0.05,
     viscosity: 5000,
 }
 
