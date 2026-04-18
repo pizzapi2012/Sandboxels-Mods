@@ -2,9 +2,12 @@ behaviors.GEL = function(pixel) {
     pixel.sticky = true
     let sticking = false
 
-    // y
+    // -y
     if ( !isEmpty(pixel.x, pixel.y-1) & getPixel(pixel.x, pixel.y-1) != null ) {
-        if ( !getPixel(pixel.x, pixel.y-1).sticky ) {
+        let stickPixel = getPixel(pixel.x, pixel.y-1)
+
+        if ( !stickPixel.sticky & elements[stickPixel.element].state != "gas" ) {
+            sticking = true
             if (Math.random() < 0.2) {
                 if (Math.random() > 0.5) {
                     if (!isEmpty(pixel.x+1, pixel.y-1)) {
@@ -24,25 +27,33 @@ behaviors.GEL = function(pixel) {
         }
     }
 
-    // x
+    // -x
     if ( !isEmpty(pixel.x-1, pixel.y) & getPixel(pixel.x-1, pixel.y) != null ) {
-        if ( !getPixel(pixel.x-1, pixel.y).sticky ) {
+        let stickPixel = getPixel(pixel.x-1, pixel.y)
+        let behindPixel = getPixel(pixel.x-2, pixel.y)
+
+        if ( !stickPixel.sticky & elements[stickPixel.element].state != "gas" ) {
+            sticking = true
             tryMove(pixel, pixel.x-1, pixel.y+1)
             return
-        } else if (getPixel(pixel.x-2, pixel.y) != null) {
-            if (!getPixel(pixel.x-2, pixel.y).sticky) {
+        } else if (behindPixel != null & stickPixel.sticky) {
+            if (!getPixel(pixel.x-2, pixel.y).sticky & elements[behindPixel.element].state != "gas") {
                 sticking = true
                 tryMove(pixel, pixel.x-1, pixel.y+1)
             }
         }
     }
-
+    // +x
     if ( !isEmpty(pixel.x+1, pixel.y) & getPixel(pixel.x+1, pixel.y) != null ) {
-        if ( !getPixel(pixel.x+1, pixel.y).sticky ) {
+        let stickPixel = getPixel(pixel.x+1, pixel.y)
+        let behindPixel = getPixel(pixel.x+2, pixel.y)
+
+        if ( !stickPixel.sticky & elements[stickPixel.element].state != "gas" ) {
+            sticking = true
             tryMove(pixel, pixel.x+1, pixel.y+1)
             return
-        } else if (getPixel(pixel.x+2, pixel.y) != null) {
-            if (!getPixel(pixel.x+2, pixel.y).sticky) {
+        } else if ( behindPixel != null & stickPixel.sticky ) {
+            if (!behindPixel.sticky & elements[behindPixel.element].state != "gas" ) {
                 sticking = true
                 tryMove(pixel, pixel.x+1, pixel.y+1)
             }
@@ -53,8 +64,9 @@ behaviors.GEL = function(pixel) {
 
 
     if ( !isEmpty(pixel.x, pixel.y+1) ) {
-        if (getPixel(pixel.x, pixel.y+1) != null) {
-            if ( !getPixel(pixel.x, pixel.y+1).sticky) {
+        let stickPixel = getPixel(pixel.x, pixel.y+1)
+        if (stickPixel != null) {
+            if ( !stickPixel.sticky & elements[stickPixel.element].state != "gas" ) {
                 sticking = true
             }
         } else {
@@ -62,7 +74,8 @@ behaviors.GEL = function(pixel) {
         }
     }
 
-    if (!tryMove(pixel, pixel.x, pixel.y+1) & Math.random() > 0.2) {
+    // normal fall
+    if (!tryMove(pixel, pixel.x, pixel.y+1) & Math.random() > 0.2 & !sticking ) {
         if (!tryMove(pixel, pixel.x+1, pixel.y+1)) {
             tryMove(pixel, pixel.x-1, pixel.y+1)
         }
@@ -70,6 +83,7 @@ behaviors.GEL = function(pixel) {
         return
     }
 
+    // the umm wandering thing
     if (Math.random() < 0.2) {
         if (sticking) {return}
 
@@ -86,4 +100,31 @@ elements.gel = {
     behavior: behaviors.GEL,
     category: "liquids",
     state: "liquid",
+    tempHigh: 600,
+    stateHigh: "gel_gas",
+    tempLow: -100,
+    stateLow: "gel_ice",
+    density: 1450,
+    stain: 1,
+    viscosity: 5000,
+}
+
+elements.gel_ice = {
+    color: "#fad38c",
+    behavior: behaviors.WALL,
+    category: "solids",
+    state: "solid",
+    tempHigh: -95,
+    stateHigh: "gel",
+    density: 917,
+}
+
+elements.gel_gas = {
+    color: "#f0a418",
+    behavior: behaviors.GAS,
+    category: "gases",
+    state: "gas",
+    tempLow: 595,
+    stateLow: "gel",
+    density: 0.6,
 }
