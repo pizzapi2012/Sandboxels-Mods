@@ -3603,60 +3603,50 @@ elements.instant_wire = {
     behavior: behaviors.WALL,
     category: "machines",
     properties: {
-        sending: 0, // -1: overwritten, 0: neutral, 1: sending
         iCharge: 0,
-        mode: 0, // 0: uncharge, 1: charge
         lastUpdate: 0,
         cooldown: 0
     },
     iConduct: 1,
     tick: function(pixel){
-        if (pixel.sending = 0){ // if neutral, see if mode should change
-            for (let i=0;i<adjacentCoords.length;i++){
-                let coord = adjacentCoords[i]
-                let x = pixel.x+adjacentCoords[0]
-                let y = pixel.y+adjacentCoords[1]
+        if (pixel.cooldown > 0){pixel.cooldown -= 1}
+        if (pixel.cooldown < 4){pixel.iCharge = 0}
+        if (pixel.cooldown = 0){
+            for (let i of adjacentCoords){
+                let x = pixel.x + i[0]
+                let y = pixel.y + i[1]
                 if (!isEmpty(x, y, true)){
                     let otherPixel = pixelMap[x][y]
                     if (otherPixel.charge){
-                        pixel.sending = 1
-                        pixel.cooldown = 5
-                        pixel.iCharge = true
+                        elements[pixel.element].iCharge(pixel, null)
+                        break;
                     }
                 }
-            }
-        } else if (pixel.sending = 1){
-            if (pixel.cooldown > 0){pixel.cooldown -= 1} else {pixel.mode = 0; pixel.iCharge = false}
-            if (pixel.mode = 0){ // if uncharging, send request and become neutral
-                for (let i=0;i<adjacentCoords.length;i++){
-                    let coord = adjacentCoords[i]
-                    let x = pixel.x+adjacentCoords[0]
-                    let y = pixel.y+adjacentCoords[1]
-                    if (!isEmpty(pixelMap[x][y])){
-                        let otherPixel = pixelMap[x][y]
-                        if (elements[otherPixel.element].iConduct && elemenets[otherPixel.element].iUncharge){
-                            elements[otherPixel.element].iUncharge(otherPixel, pixel)
-                        }
-                    }
-                }
-                pixel.sending = 0
-                pixel.lastUpdate = pixelTicks
-            } else if (pixel.mode = 1){ // if charging, send request
-                for (let i=0;i<adjacentCoords.length;i++){
-                    let coord = adjacentCoords[i]
-                    let x = pixel.x+adjacentCoords[0]
-                    let y = pixel.y+adjacentCoords[1]
-                    if (!isEmpty(pixelMap[x][y])){
-                        let otherPixel = pixelMap[x][y]
-                        if (elements[otherPixel.element].iConduct && elemenets[otherPixel.element].iCharge){
-                            elements[otherPixel.element].iCharge(otherPixel, pixel)
-                        }
-                    }
-                }
-                pixel.lastUpdate = pixelTicks
             }
         }
     },
-    iUncharge: function(pixel, otherPixel){},
-    iCharge: function(pixel, otherPixel){}
+    iCharge: function(pixel, otherPixel){
+        pixel.iCharge = 1
+        pixel.cooldown = 8
+        pixel.lastUpdate = pixelTicks
+        for (let i of adjacentCoords){
+            let x = pixel.x + i[0]
+            let y = pixel.y + i[1]
+            if (!isEmpty(x, y, true)){
+                let spreadPixel = pixelMap[x][y]
+                if (elements[spreadPixel.element].iConduct && pixel.lastUpdate > spreadPixel.lastUpdate){
+                    elements[spreadPixel.element].iCharge(spreadPixel, pixel)
+                }
+            }
+        }
+    },
+    renderer: function(pixel, ctx){
+        let rgb = getPixelColor(pixel);
+        let hsv = RGBtoHSV(rgb[0], rgb[1], rgb[2])
+        if (!pixel.iCharge){hsv.v *= 0.3}
+        let rgb2 = HSVtoRGB(hsv.h, hsv.s, hsv.v)
+        let hex = RGBToHex(rgb2.r, rgb2.g, rgb2,b)
+        drawSquare(ctx, hex, pixel.x, pixel.y)
+    },
+    updateOrder: 203847
 }
