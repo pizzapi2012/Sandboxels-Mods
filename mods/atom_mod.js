@@ -346,7 +346,10 @@ elements.merge = {
 				if (elements[resultlower]) {
 					createPixel(resultlower, pixel.x, pixel.y)
 				} else {
+					pixelx = pixel.x
+					pixely = pixel.y
 					explodeAt(pixel.x, pixel.y, getExploisionSize(pixel.neutrons, pixel.protons), fire="fire")
+					deletePixex(x, y)
 					promptText("Cannot find element: " + resultlower + ", You might need to install a mod")
 				}
 			} else {
