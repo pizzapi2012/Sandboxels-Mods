@@ -135,13 +135,23 @@ var listofelements = {
 	"Oganesson": [176, 118, 118] // 294
 }
 
+let enable_electron_shells;
+dependOn("betterSettings.js", function() {
+  let atomjs_SettingsTab = new SettingsTab("Atom Mod");
+  enable_electron_shells = new Setting("Electron Shells", "enableelectronshells", settingType.BOOLEAN, false, true)
+  atomjs_SettingsTab.registerSettings("Options\n", enable_electron_shells);
+  settingsManager.registerTab(atomjs_SettingsTab)
+}, true)
+
+
+
 // Thanks to ggod for this function
 function compareArray(arr1, arr2) {
     return arr1.length === arr2.length && arr1.every((a, i) => arr2[i] === a);
 }
 
-function getExploisionSize(neutrons, protons) {
-		result = (neutrons - protons) * 1.5
+function getExploisionSize(neutrons, protons, electrons) {
+		result = (neutrons - protons) * (electrons / 2)
 		if (result <= 0 || result == 0) return 6
 		return Math.round(result)
 }
@@ -150,6 +160,30 @@ function getExploisionSize(neutrons, protons) {
 // Posted by UncleLaz
 function getKeyByValue(object, value) {
     return Object.keys(object).find(key => compareArray(object[key], value));
+}
+
+// HUGE THANKS to nouser for the electron rings
+const electronShells = { // amount of electrons in ring followed by distance
+  2: 4,
+  8: 6,
+  18: 10,
+  32: 16,
+  64: 32,
+  128: 64,
+  256: 128
+}
+function findElectronValue(index, list, mode)  {
+  let valueSum = 0
+  for (let value in list){
+    if (index <= valueSum+parseInt(list[value])){
+      if (mode == 1){ // find fraction
+         return ((index-valueSum)/parseInt(list[value]))
+      } else { // find distance
+         return list[value]
+      }
+    }
+    valueSum += parseInt(list[value])
+  }
 }
 
 elements.electron = {
@@ -234,6 +268,20 @@ elements.nucleus = {
 				deletePixel(newPx.x, newPx.y)
 			}
     	}
+	},
+	renderer: function(pixel, ctx) {
+		drawDefault(ctx, pixel)
+		if (enable_electron_shells.value) {
+			let speed = 7
+		    if (pixel.electrons > 0)  {
+		        for (let i = 0; i < pixel.electrons; i++) {
+				    let distance = electronShells[findElectronValue(i-1,Object.keys(electronShells), 2)]
+				    let x = Math.cos(pixelTicks / speed * 0.2 + (2*Math.PI*(findElectronValue(i-1, Object.keys(electronShells), 1)))) * distance + pixel.x
+		            let y = Math.sin(pixelTicks / speed * 0.2 + (2*Math.PI*(findElectronValue(i-1, Object.keys(electronShells), 1)))) * distance + pixel.y
+				    drawPlus(ctx, "#146c09", x, y)
+			}
+		}
+		}
 	},
 	maxSize: 1
 }
@@ -348,7 +396,7 @@ elements.merge = {
 				} else {
 					pixelx = pixel.x
 					pixely = pixel.y
-					explodeAt(pixel.x, pixel.y, getExploisionSize(pixel.neutrons, pixel.protons), fire="fire")
+					explodeAt(pixel.x, pixel.y, getExploisionSize(pixel.neutrons, pixel.protons, pixel.electrons), fire="fire")
 					deletePixex(x, y)
 					promptText("Cannot find element: " + resultlower + ", You might need to install a mod")
 				}
@@ -356,7 +404,7 @@ elements.merge = {
 				if ((pixel != null) && (result == undefined)) {
 					pixelx = pixel.x
 					pixely = pixel.y
-					const explodesize = Number(getExploisionSize(pixel.neutrons, pixel.protons))
+					const explodesize = Number(getExploisionSize(pixel.neutrons, pixel.protons, pixel.electrons))
 					explodeAt(pixel.x, pixel.y, explodesize, fire=["fire", "radiation"])
 					deletePixel(pixelx, pixely)
 				}
