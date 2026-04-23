@@ -150,7 +150,7 @@ function compareArray(arr1, arr2) {
 
 function getExploisionSize(neutrons, protons, electrons) {
 		result = (neutrons - protons) * (electrons / 2)
-		if (result <= 0 || result == 0) return 6
+		if (result <= 0 || result == 0) return Math.round(6 * (electrons / 2))
 		return Math.round(result)
 }
 
