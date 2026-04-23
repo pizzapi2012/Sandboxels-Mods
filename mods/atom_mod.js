@@ -143,8 +143,6 @@ dependOn("betterSettings.js", function() {
   settingsManager.registerTab(atomjs_SettingsTab)
 }, true)
 
-
-
 // Thanks to ggod for this function
 function compareArray(arr1, arr2) {
     return arr1.length === arr2.length && arr1.every((a, i) => arr2[i] === a);
@@ -172,6 +170,7 @@ const electronShells = { // amount of electrons in ring followed by distance
   128: 64,
   256: 128
 }
+
 function findElectronValue(index, list, mode)  {
   let valueSum = 0
   for (let value in list){
@@ -218,6 +217,7 @@ elements.frozen_proton = {
 	density: 0.00002,
 	ignoreAir: true,
 }
+
 elements.frozen_neutron = {
 	color: "#a6ffff",
 	behavior: behaviors.WALL,
@@ -239,6 +239,7 @@ elements.frozen_neutron = {
 	density: 0.00003,
 	ignoreAir: true,
 }
+
 elements.nucleus = {
 	color: ["#ffa6a6", "#a6ffff", "#146c09"],
 	behavior: behaviors.WALL,
@@ -363,6 +364,7 @@ elements.add_proton = {
 		}
 	}
 }
+
 elements.add_neutron = {
     color: "#a6ffff",
 	category: "tools",
@@ -373,6 +375,7 @@ elements.add_neutron = {
 		}
 	}
 }
+
 elements.add_electron = {
     color: "#146c09",
 	category: "tools",
@@ -383,6 +386,7 @@ elements.add_electron = {
 		}
 	}
 }
+
 elements.merge = {
 	color: ["#ffa6a6", "#a6ffff", "#146c09"],
 	category: "tools",
