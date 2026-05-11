@@ -3681,7 +3681,7 @@ elements.iwifi_transmitter = {
     name: "iWiFi Transmitter",
     behavior: behaviors.WALL,
     category: "machines",
-    properties: {lastCharge:0},
+    properties: {lastUpdate:0},
     onSelect: async function(){
         let ans = await _nousersthingsprompt("What should the channel of this transmitter be?", 0)
         if (typeof ans != "undefined"){
@@ -3706,7 +3706,7 @@ elements.iwifi_receiver = {
     name: "iWiFi Receiver",
     category: "machines",
     behavior: behaviors.WALL,
-    properties: {lastCharge:0},
+    properties: {lastUpdate:0},
     onSelect: async function(){
         let ans = await _nousersthingsprompt("What should the channel of this transmitter be?", 0)
         if (typeof ans != "undefined"){
