@@ -3690,7 +3690,7 @@ elements.iwifi_transmitter = {
     },
     iCharge: function(pixel, otherPixel){
         let wifipixels = currentPixels.filter(function(pixelToCheck) {
-            if (pixelToCheck.element == "iwifi_receiver" && pixelToCheck.channel === pixel.channel){
+            if (pixelToCheck.element == "iwifi_receiver" && pixelToCheck.channel === pixel.channel && pixelToCheck.lastUpdate < pixelTicks){
                 return true;
             }
         })
