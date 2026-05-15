@@ -9,14 +9,17 @@
 //! @createdElements electron; frozen_proton; frozen_neutron; nucleus
 
 // Changelog 1.0.0
-// Added Electron, Frozen Proton, Frozen Neutron and Nucleus
-// If Nucleus is touching a Neutron, Proton or a Electron it adds itself to the Nucleus.
-// Merge tool merges all the neutrons, protons and electrons in a Nucleus and makes the element.
+/*
+ feat: Added Electron, Frozen Proton, Frozen Neutron and Nucleus
+ If Nucleus is touching a Neutron, Proton or a Electron it adds itself to the Nucleus.
+*/
 
 // Changelog 1.0.1
-// fix: fixed bug if there was no electrons in a nucleus when it got merged it did not explode.
-// chore: some code formatting
-// feat: made the merge tool look cool.
+/*
+  fix: bug if there was no electrons in a nucleus when it got merged it did not explode.
+  style: code formatting.
+  feat: made the merge tool look cool.
+*/
 
 // formula {"name": [neutrons, protons, electrons]} // isotope
 var listofelements = {
