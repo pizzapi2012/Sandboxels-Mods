@@ -30,7 +30,7 @@ var listofelements = {
   Boron: [6, 5, 5], // 11
   Carbon: [6, 6, 6], // 12
   Nitrogen: [7, 7, 7], // 14
-  Oxigen: [8, 8, 8], // 16
+  Oxygen: [8, 8, 8], // 16
   Fluorine: [10, 9, 9], // 19
   Neon: [10, 10, 10], // 20
   Sodium: [12, 11, 11], // 23
@@ -267,6 +267,7 @@ elements.frozen_proton = {
   density: 0.00002,
   ignoreAir: true,
 };
+
 elements.frozen_neutron = {
   color: "#a6ffff",
   behavior: behaviors.WALL,
@@ -294,6 +295,7 @@ elements.frozen_neutron = {
   density: 0.00003,
   ignoreAir: true,
 };
+
 elements.nucleus = {
   color: ["#ffa6a6", "#a6ffff", "#146c09"],
   behavior: behaviors.WALL,
@@ -452,6 +454,7 @@ elements.add_proton = {
     }
   },
 };
+
 elements.add_neutron = {
   color: "#a6ffff",
   category: "tools",
@@ -462,6 +465,7 @@ elements.add_neutron = {
     }
   },
 };
+
 elements.add_electron = {
   color: "#146c09",
   category: "tools",
@@ -472,6 +476,7 @@ elements.add_electron = {
     }
   },
 };
+
 elements.merge = {
   color: ["#ffa6a6", "#000000", "#a6ffff", "#000000", "#146c09"],
   category: "tools",
@@ -482,6 +487,7 @@ elements.merge = {
         pixel.protons,
         pixel.electrons,
       ]);
+
       if (result != null && result != undefined) {
         resultlower = result.toLowerCase();
         if (elements[resultlower]) {
