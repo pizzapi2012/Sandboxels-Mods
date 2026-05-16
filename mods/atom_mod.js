@@ -307,11 +307,11 @@ elements.nucleus = {
   },
   hoverStat: function (pixel) {
     return (
-      "Neutrons:" +
+      "Neutron:" +
       pixel.neutrons +
-      " Protons:" +
+      "Proton:" +
       pixel.protons +
-      " Electrons:" +
+      "Electron:" +
       pixel.electrons
     );
   },
